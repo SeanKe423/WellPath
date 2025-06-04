@@ -1276,7 +1276,7 @@ width:275px !important;
   text-align: center;
   font-weight: 600;
   /*background: linear-gradient(120deg, #4CAF50, #45a049);*/
-  -webkit-background-clip: text;
+  /*-webkit-background-clip: text;*/
  /* -webkit-text-fill-color: transparent;*/
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
