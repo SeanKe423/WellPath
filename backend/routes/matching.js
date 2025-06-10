@@ -31,7 +31,8 @@ router.get('/matches', authMiddleware, async (req, res) => {
         virtualCounseling: match.institution.virtualCounseling,
         numberOfCounselors: match.institution.numberOfCounselors,
         yearsOfOperation: match.institution.yearsOfOperation,
-        targetAgeGroups: match.institution.targetAgeGroups || []
+        targetAgeGroups: match.institution.targetAgeGroups || [],
+        institutionType: match.institution.institutionType
       },
       matchQuality: match.matchQuality,
       scores: match.scores

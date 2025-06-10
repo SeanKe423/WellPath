@@ -45,6 +45,18 @@ const Matches = () => {
     return labels[ageGroup] || ageGroup;
   };
 
+  const getInstitutionTypeLabel = (type) => {
+    const labels = {
+      'ngo': 'NGO / Non-profit',
+      'private': 'Private Counseling Practice',
+      'religious': 'Religious/Church-based Center',
+      'university': 'University Counseling Center',
+      'government': 'Government Clinic',
+      'other': 'Other'
+    };
+    return labels[type] || type;
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -140,6 +152,11 @@ const Matches = () => {
                 <div className="request-section">
                   <h4>Address</h4>
                   <p>{match.institution.location?.address || 'Address not provided'}</p>
+                </div>
+
+                <div className="request-section">
+                  <h4>Type of Institution</h4>
+                  <p>{getInstitutionTypeLabel(match.institution.institutionType)}</p>
                 </div>
 
                 <div className="request-section">
