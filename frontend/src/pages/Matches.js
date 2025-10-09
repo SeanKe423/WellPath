@@ -7,6 +7,8 @@ const Matches = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [comment, setComment] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +33,30 @@ const Matches = () => {
       console.error('Error fetching matches:', error);
       setError('Error fetching matches. Please try again.');
       setLoading(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!comment.trim()) return;
+
+    setSubmittingComment(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5000/api/matching/feedback', {
+        comment: comment.trim()
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setComment('');
+      alert('Thank you for your feedback!');
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      alert('Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -159,6 +185,7 @@ const Matches = () => {
                   <p>{getInstitutionTypeLabel(match.institution.institutionType)}</p>
                 </div>
 
+
                 <div className="request-section">
                   <h4>Age Groups</h4>
                   <div className="tags-container">
@@ -183,6 +210,28 @@ const Matches = () => {
           ))}
         </div>
       )}
+
+      <div className="feedback-section">
+        <h3>Help Us Improve</h3>
+        <p>Share your thoughts about the matching results</p>
+        <form onSubmit={handleCommentSubmit} className="feedback-form">
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Tell us what you think about the matches..."
+            rows="4"
+            className="feedback-textarea"
+          />
+          <button 
+            type="submit" 
+            className="submit-feedback-button"
+            disabled={submittingComment || !comment.trim()}
+          >
+            {submittingComment ? 'Submitting...' : 'Submit Feedback'}
+          </button>
+        </form>
+      </div>
+
       <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'center' }}>
         <button
           className="edit-button"

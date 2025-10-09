@@ -1,10 +1,11 @@
 const User = require('../models/User');
 const Institution = require('../models/Institution');
 
+//Function to calculate the distance between the user and institution coordinates using the Haversine formula
 const calculateDistance = (coords1, coords2) => {
   const R = 6371; // Earth's radius in km
-  const dLat = toRad(coords2[0] - coords1[0]);
-  const dLon = toRad(coords2[1] - coords1[1]);
+  const dLat = toRad(coords2[0] - coords1[0]); //Difference in latitude
+  const dLon = toRad(coords2[1] - coords1[1]); //Difference in longitude
   
   const a = 
     Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -12,9 +13,10 @@ const calculateDistance = (coords1, coords2) => {
     Math.sin(dLon/2) * Math.sin(dLon/2);
   
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+  return R * c; //Distance in km
 };
 
+//Function to convert degrees to radians
 const toRad = (degrees) => {
   return degrees * (Math.PI/180);
 };
@@ -24,7 +26,9 @@ const filterEligibleInstitutions = (institutions, userPreferences) => {
     // Basic requirements
     if (!institution.isLegallyRegistered || 
         !institution.upholdEthics || 
-        !institution.consentToDisplay) {
+        !institution.consentToDisplay ||
+        institution.approvalStatus === 'rejected' || // Exclude rejected institutions
+        institution.approvalStatus !== 'approved') { // Only include approved institutions
       return false;
     }
 
@@ -78,7 +82,7 @@ const calculateLocationMatchScore = (userLocation, institutionLocation, preferre
   let score = 0;
 
   if (preferredMode.includes('online')) {
-    // For online sessions, location is less important
+    // For online sessions, location is less important so we multiply by 0.8
     score = maxScore * 0.8;
   } else {
     // Calculate distance between user and institution

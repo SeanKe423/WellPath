@@ -3,14 +3,20 @@ const jwt = require("jsonwebtoken");
 const authMiddleware = async (req, res, next) => {
   try {
     // Get token from header
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = req.header("Authorization");
+    console.log("Auth header:", authHeader); // Debug log
 
-    console.log("Received token:", token); // Debug log
-
-    if (!token) {
-      console.log("No token provided"); // Debug log
+    if (!authHeader) {
+      console.log("No Authorization header provided"); // Debug log
       return res.status(401).json({ message: "No token, authorization denied" });
     }
+
+    // Handle both formats: "Bearer token" and just "token"
+    const token = authHeader.startsWith('Bearer ') 
+      ? authHeader.slice(7) 
+      : authHeader;
+
+    console.log("Extracted token:", token); // Debug log
 
     try {
       // Verify token
@@ -18,6 +24,7 @@ const authMiddleware = async (req, res, next) => {
       
       // Check if token is expired
       if (decoded.exp < Date.now() / 1000) {
+        console.log("Token expired"); // Debug log
         return res.status(401).json({ message: "Token has expired" });
       }
       

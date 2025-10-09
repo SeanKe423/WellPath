@@ -383,4 +383,39 @@ router.post('/create-test-institution', async (req, res) => {
   }
 });
 
+// Create admin user (protected route - only accessible with admin secret)
+router.post('/create-admin', async (req, res) => {
+  try {
+    const { email, password, adminSecret } = req.body;
+
+    // Check admin secret
+    if (adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ message: 'Invalid admin secret' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Create new admin user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const adminUser = new User({
+      email,
+      password: hashedPassword,
+      role: 'admin',
+      name: 'Admin User', // You can modify this or make it configurable
+      profileCompleted: true // Admin doesn't need to complete profile
+    });
+
+    await adminUser.save();
+
+    res.status(201).json({ message: 'Admin user created successfully' });
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    res.status(500).json({ message: 'Error creating admin user', error: error.message });
+  }
+});
+
 module.exports = router;

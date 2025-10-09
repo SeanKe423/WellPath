@@ -9,12 +9,19 @@ const Login = () => {
     role: "user",
   });
   const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     if (token) {
-      navigate('/dashboard');
+      if (role === 'admin') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [navigate]);
 
@@ -31,32 +38,49 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      console.log("Attempting login with:", formData);
+      console.log('Attempting login with:', { email: formData.email, password: formData.password, role: formData.role });
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email, password: formData.password, role: formData.role }),
+      });
 
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login", 
-        formData
-      );
+      const data = await response.json();
+      console.log('Login response:', data);
 
-      console.log("Login response:", res.data);
-
-      // Store token without 'Bearer' prefix
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
-
-      if (res.data.profileCompleted) {
-        if (res.data.role === 'institution') {
-          navigate('/dashboard');
+      if (response.ok) {
+        console.log('Login role:', data.role);
+        console.log('Login token:', data.token);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userId', data.userId);
+        
+        // Use replace instead of push to prevent back navigation
+        if (data.role === 'admin') {
+          console.log('Redirecting to admin dashboard');
+          navigate('/admin-dashboard', { replace: true });
+        } else if (data.role === 'institution') {
+          console.log('Redirecting to institution profile');
+          navigate('/institution-profile', { replace: true });
         } else {
-          navigate('/matches');
+          console.log('Redirecting to matches');
+          navigate('/matches', { replace: true });
         }
       } else {
-        navigate(res.data.role === "institution" ? "/institution-profile" : "/user-profile");
+        console.error('Login failed:', data.message);
+        setError(data.message || 'Login failed');
       }
-    } catch (error) {
-      console.error("Login error:", error.response || error);
-      alert(error.response?.data?.message || "Login failed");
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred during login');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,6 +109,7 @@ const Login = () => {
                   onChange={handleChange}
                   required
                   className="auth-input"
+                  autoComplete="email"
                 />
               </div>
               
@@ -97,6 +122,7 @@ const Login = () => {
                   onChange={handleChange}
                   required
                   className="auth-input"
+                  autoComplete="current-password"
                 />
               </div>
               
@@ -109,6 +135,7 @@ const Login = () => {
                 >
                   <option value="user">User</option>
                   <option value="institution">Institution</option>
+                  <option value="admin">Admin</option>
                 </select>
               </div>
               

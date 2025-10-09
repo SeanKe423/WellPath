@@ -9,6 +9,7 @@ import InstitutionProfile from "./pages/InstitutionProfile";
 import EditUserProfile from './pages/EditUserProfile';
 import EditInstitutionProfile from './pages/EditInstitutionProfile';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Matches from './pages/Matches';
 import "./App.css";
 
@@ -23,6 +24,11 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           
           {/* Protected Routes */}
+          <Route path="/admin-dashboard" element={
+            <PrivateRoute requiredRole="admin">
+              <AdminDashboard />
+            </PrivateRoute>
+          } />
           <Route path="/dashboard" element={
             <PrivateRoute>
               <Dashboard />

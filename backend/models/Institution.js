@@ -18,6 +18,10 @@ const counselorSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  representativeName: {
+    type: String,
+    required: true
+  },
   registrationNumber: {
     type: String,
     required: true
@@ -119,6 +123,14 @@ const counselorSchema = new mongoose.Schema({
   isVerified: {
     type: Boolean,
     default: false
+  },
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  rejectionReason: {
+    type: String
   },
   
   // Timestamps

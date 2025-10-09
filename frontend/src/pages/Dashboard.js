@@ -11,6 +11,12 @@ const Dashboard = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    if (role === 'admin') {
+      navigate('/admin-dashboard');
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -37,7 +43,7 @@ const Dashboard = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

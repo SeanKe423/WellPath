@@ -27,6 +27,7 @@ exports.signup = async (req, res) => {
         password: hashedPassword,
         // Set default values for required fields
         institutionName: 'Pending',
+        representativeName: name || 'Pending',
         registrationNumber: 'Pending',
         yearsOfOperation: 'less1',
         institutionType: 'private',
@@ -81,12 +82,20 @@ exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    // Find user based on role
-    let user;
-    if (role === 'institution') {
+    // First check if it's an admin user
+    let user = await User.findOne({ email, role: 'admin' });
+    let userRole = 'admin';
+
+    // If not admin, check institution
+    if (!user) {
       user = await Institution.findOne({ email });
-    } else {
+      userRole = 'institution';
+    }
+
+    // If not institution, check regular user
+    if (!user) {
       user = await User.findOne({ email });
+      userRole = 'user';
     }
 
     if (!user) {
@@ -99,10 +108,15 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Verify role matches
+    if (role && role !== userRole) {
+      return res.status(400).json({ message: 'Invalid role for this user' });
+    }
+
     // Create JWT token
     const payload = {
       id: user.id,
-      role: role
+      role: userRole
     };
 
     const token = jwt.sign(
@@ -114,7 +128,7 @@ exports.login = async (req, res) => {
     // Send response with token and role
     res.json({
       token,
-      role,
+      role: userRole,
       profileCompleted: user.profileCompleted || false
     });
   } catch (error) {
