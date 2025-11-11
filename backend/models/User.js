@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
     required: false
   },
 
-  // Accessibility & Availability
+  // Accessibility
   preferredMode: [{
     type: String,
     enum: ['in-person', 'online', 'no-preference']

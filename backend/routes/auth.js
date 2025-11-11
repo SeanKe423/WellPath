@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const Institution = require("../models/Institution");
+const Admin = require("../models/Admin");
 const router = express.Router();
 const authController = require('../controllers/authController');
 
@@ -386,27 +387,27 @@ router.post('/create-test-institution', async (req, res) => {
 // Create admin user (protected route - only accessible with admin secret)
 router.post('/create-admin', async (req, res) => {
   try {
-    const { email, password, adminSecret } = req.body;
+    const { username, email, password, adminSecret } = req.body;
 
     // Check admin secret
     if (adminSecret !== process.env.ADMIN_SECRET) {
       return res.status(403).json({ message: 'Invalid admin secret' });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Check if admin already exists
+    const existingAdmin = await Admin.findOne({ $or: [{ email }, { username }] });
+    if (existingAdmin) {
+      return res.status(400).json({ message: 'Admin with this email or username already exists' });
     }
 
     // Create new admin user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const adminUser = new User({
+    const adminUser = new Admin({
+      username,
       email,
       password: hashedPassword,
       role: 'admin',
-      name: 'Admin User', // You can modify this or make it configurable
-      profileCompleted: true // Admin doesn't need to complete profile
+      isActive: true
     });
 
     await adminUser.save();

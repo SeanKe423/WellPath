@@ -1,31 +1,31 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const cors = require("cors");
+const express = require("express"); // Express framework for creating the server.
+const mongoose = require("mongoose"); // ODM(Object Data Modeling) tool for MongoDB.
+const dotenv = require("dotenv"); // Loads environment variables from .env.
+const cors = require("cors"); // Cross-Origin Resource Sharing to allow requests from different origins.
 const fileUpload = require("express-fileupload");
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs"); // File system module for file operations.
 
 // Load environment variables
 dotenv.config();
 
-const authRoutes = require("./routes/auth"); // Import auth routes
-const matchingRoutes = require("./routes/matching"); // Add this line
-const adminRoutes = require('./routes/admin');
+const authRoutes = require("./routes/auth"); // Import auth routes from auth.js file
+const matchingRoutes = require("./routes/matching"); // Import matching routes from matching.js file
+const adminRoutes = require('./routes/admin'); // Import admin routes from admin.js file
 
-const app = express();
+const app = express(); // Create express application.
 
 // Middleware
-app.use(express.json());
-app.use(cors());
-app.use(fileUpload());
+app.use(express.json()); // Parse JSON bodies.
+app.use(cors()); // Enable cross-origin for all routes.
+app.use(fileUpload()); // Handle file uploads.
 
-// Create uploads directory if it doesn't exist
+// Create uploads directory if it doesn't exist. Useful for new deployments on new machines that don't already have the folder.
 if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
 }
 
-// Serve uploaded files
+// Expose the uploads directory to the client so they can be displayed/downloaded by the frontend.
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
@@ -34,11 +34,11 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Routes
-app.use("/api/auth", authRoutes); // Ensure this is present
-app.use("/api/matching", matchingRoutes); // Add this line
+app.use("/api/auth", authRoutes); //Whenever a request starts with /api/auth, it is sent to authRoutes. Line 12
+app.use("/api/matching", matchingRoutes); 
 app.use('/api/admin', adminRoutes);
 
-// Add debug route to test API
+// API test 
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working' });
 });
@@ -81,3 +81,4 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
+

@@ -1,5 +1,8 @@
+//Signup Controller, Login Controller, Password Hashing, JWT Token Generation
+
 const User = require('../models/User');
 const Institution = require('../models/Institution');
+const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
@@ -8,24 +11,32 @@ exports.signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Check if user already exists
+    // Checks if institution, user or admin already exist
     let user = await Institution.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
+    
+    let existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
 
+    let adminUser = await Admin.findOne({ email });
+    if (adminUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user based on role
     if (role === 'institution') {
-      // For institutions, we only create the basic auth info
-      // The rest of the profile will be completed in the profile creation step
+      // For institutions, only the basic authentication info is created
       user = new Institution({
         email,
         password: hashedPassword,
-        // Set default values for required fields
+        // Set default values for required fields. The rest of the profile is completed in the profile creation step
         institutionName: 'Pending',
         representativeName: name || 'Pending',
         registrationNumber: 'Pending',
@@ -48,14 +59,13 @@ exports.signup = async (req, res) => {
       user = new User({
         name,
         email,
-        password: hashedPassword,
-        role: 'user'
+        password: hashedPassword
       });
     }
 
     await user.save();
 
-    // Create JWT token
+    // Create JWT tokens for signup
     const payload = {
       id: user.id,
       role: role
@@ -82,17 +92,17 @@ exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    // First check if it's an admin user
-    let user = await User.findOne({ email, role: 'admin' });
+    // Checks if it's an admin user
+    let user = await Admin.findOne({ email, isActive: true });
     let userRole = 'admin';
 
-    // If not admin, check institution
+    // If not admin, checks if it's an institution
     if (!user) {
       user = await Institution.findOne({ email });
       userRole = 'institution';
     }
 
-    // If not institution, check regular user
+    // If not institution, checks if it's a regular user
     if (!user) {
       user = await User.findOne({ email });
       userRole = 'user';
@@ -113,7 +123,12 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid role for this user' });
     }
 
-    // Create JWT token
+    // Update lastLogin for admin users
+    if (userRole === 'admin') {
+      await Admin.findByIdAndUpdate(user._id, { lastLogin: new Date() });
+    }
+
+    // Create JWT tokens for login
     const payload = {
       id: user.id,
       role: userRole
@@ -125,7 +140,7 @@ exports.login = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // Send response with token and role
+    // Send response with token and role to the frontend
     res.json({
       token,
       role: userRole,
@@ -146,7 +161,10 @@ exports.getUserProfile = async (req, res) => {
     console.log('User role:', req.user.role);
 
     let user;
-    if (req.user.role === 'institution') {
+    if (req.user.role === 'admin') {
+      console.log('Searching in Admin collection');
+      user = await Admin.findById(req.user.id);
+    } else if (req.user.role === 'institution') {
       console.log('Searching in Institution collection');
       user = await Institution.findById(req.user.id);
     } else {

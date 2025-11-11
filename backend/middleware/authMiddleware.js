@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: "No token, authorization denied" });
     }
 
-    // Handle both formats: "Bearer token" and just "token"
+    // Handle both formats: "Bearer token" and just "token" to reduce token errors
     const token = authHeader.startsWith('Bearer ') 
       ? authHeader.slice(7) 
       : authHeader;
