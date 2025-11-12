@@ -100,17 +100,8 @@ const Dashboard = () => {
             <p><strong>Number of Counselors:</strong> {profile.numberOfCounselors || 'Not specified'}</p>
             <p><strong>Wait Time:</strong> {profile.waitTime || 'Not specified'}</p>
             <p><strong>Legally Registered:</strong> {profile.isLegallyRegistered ? 'Yes' : 'No'}</p>
-            <p><strong>Uphold Ethics:</strong> {profile.upholdEthics ? 'Yes' : 'No'}</p>
             <p><strong>Consent to Display:</strong> {profile.consentToDisplay ? 'Yes' : 'No'}</p>
           </div>
-          {profile.documents && (
-            <div className="info-section">
-              <h4>Documents</h4>
-              <a href={`http://localhost:5000${profile.documents}`} target="_blank" rel="noopener noreferrer">
-                View Uploaded Documents
-              </a>
-            </div>
-          )}
         </div>
       </div>
     </div>

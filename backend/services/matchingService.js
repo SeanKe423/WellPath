@@ -25,7 +25,6 @@ const filterEligibleInstitutions = (institutions, userPreferences) => {
   return institutions.filter(institution => {
     // Basic requirements
     if (!institution.isLegallyRegistered || 
-        !institution.upholdEthics || 
         !institution.consentToDisplay ||
         institution.approvalStatus === 'rejected' || // Exclude rejected institutions
         institution.approvalStatus !== 'approved') { // Only include approved institutions
@@ -133,8 +132,8 @@ const calculateAdditionalFactorsScore = (institution) => {
   const counselorsScore = Math.min(numCounselors / 10, 3);
   score += counselorsScore;
 
-  // Legal and ethical compliance (4 points)
-  if (institution.isLegallyRegistered && institution.upholdEthics) {
+  // Legal compliance (4 points)
+  if (institution.isLegallyRegistered) {
     score += 4;
   }
 

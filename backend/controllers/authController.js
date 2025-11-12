@@ -51,7 +51,6 @@ exports.signup = async (req, res) => {
         numberOfCounselors: 1,
         waitTime: 'sameWeek',
         isLegallyRegistered: false,
-        upholdEthics: false,
         consentToDisplay: false,
         profileCompleted: false
       });

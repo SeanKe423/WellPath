@@ -8,11 +8,11 @@ const isAdmin = (req, res, next) => {
   console.log('Admin middleware - User:', req.user);
   if (!req.user) {
     console.error('Admin middleware - No user found in request');
-    return res.status(401).json({ message: 'Authentication required' });
+    return res.status(401).json({ message: 'Authentication required' }); //401 = Unauthorized
   }
   if (req.user.role !== 'admin') {
     console.error('Admin middleware - Invalid role:', req.user.role);
-    return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    return res.status(403).json({ message: 'Access denied. Admin role required.' }); //403 = Forbidden
   }
   console.log('Admin middleware - Access granted');
   next();

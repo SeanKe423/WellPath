@@ -66,8 +66,8 @@ const Login = () => {
           console.log('Redirecting to admin dashboard');
           navigate('/admin-dashboard', { replace: true });
         } else if (data.role === 'institution') {
-          console.log('Redirecting to institution profile');
-          navigate('/institution-profile', { replace: true });
+          console.log('Redirecting to dashboard');
+          navigate('/dashboard', { replace: true });
         } else {
           console.log('Redirecting to matches');
           navigate('/matches', { replace: true });

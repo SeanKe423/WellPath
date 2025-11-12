@@ -23,9 +23,7 @@ const EditInstitutionProfile = () => {
     waitTime: '',
     numberOfInstitutions: '',
     isLegallyRegistered: false,
-    upholdEthics: false,
-    consentToDisplay: false,
-    documents: null
+    consentToDisplay: false
   });
   const navigate = useNavigate();
 
@@ -50,8 +48,6 @@ const EditInstitutionProfile = () => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setFormData({ ...formData, [name]: checked });
-    } else if (type === 'file') {
-      setFormData({ ...formData, [name]: e.target.files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -68,11 +64,7 @@ const EditInstitutionProfile = () => {
       }
       const formDataToSend = new FormData();
       Object.keys(formData).forEach(key => {
-        if (key === 'documents') {
-          if (formData[key] && formData[key] instanceof File) {
-            formDataToSend.append(key, formData[key]);
-          }
-        } else if (typeof formData[key] === 'object' && !Array.isArray(formData[key]) && formData[key] !== null) {
+        if (typeof formData[key] === 'object' && !Array.isArray(formData[key]) && formData[key] !== null) {
           formDataToSend.append(key, JSON.stringify(formData[key]));
         } else if (Array.isArray(formData[key])) {
           formDataToSend.append(key, JSON.stringify(formData[key]));
@@ -161,14 +153,8 @@ const EditInstitutionProfile = () => {
           <label>Legally Registered
             <input type="checkbox" name="isLegallyRegistered" checked={formData.isLegallyRegistered} onChange={handleChange} />
           </label>
-          <label>Uphold Ethics
-            <input type="checkbox" name="upholdEthics" checked={formData.upholdEthics} onChange={handleChange} />
-          </label>
           <label>Consent to Display
             <input type="checkbox" name="consentToDisplay" checked={formData.consentToDisplay} onChange={handleChange} />
-          </label>
-          <label>Documents
-            <input type="file" name="documents" onChange={handleChange} />
           </label>
           <button type="submit">Save Changes</button>
         </form>

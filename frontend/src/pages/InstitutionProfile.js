@@ -48,9 +48,7 @@ const InstitutionProfile = () => {
     waitTime: '',
 
     // Step 5: Ethics, Verification & Consent
-    documents: null,
     isLegallyRegistered: false,
-    upholdEthics: false,
     consentToDisplay: false
   });
   const [isEditMode, setIsEditMode] = useState(false);
@@ -98,11 +96,6 @@ const InstitutionProfile = () => {
           [name]: checked
         }));
       }
-    } else if (type === 'file') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: e.target.files[0]
-      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -124,10 +117,6 @@ const InstitutionProfile = () => {
       Object.keys(formData).forEach(key => {
         if (key === 'location') {
           formDataObj.append('location', JSON.stringify(formData.location));
-        } else if (key === 'documents') {
-          if (formData.documents) {
-            formDataObj.append('documents', formData.documents);
-          }
         } else if (Array.isArray(formData[key])) {
           formDataObj.append(key, JSON.stringify(formData[key]));
         } else if (typeof formData[key] === 'boolean') {
@@ -451,18 +440,6 @@ const InstitutionProfile = () => {
           <section className="form-step-section">
             <h3>Step 5: Ethics, Verification & Consent</h3>
             <div className="form-questions">
-              <div className="file-upload">
-                <label>Upload Documents:</label>
-                <input
-                  type="file"
-                  name="documents"
-                  onChange={handleChange}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  required
-                />
-                <small>Upload institution license/registration (PDF, JPG, PNG)</small>
-              </div>
-
               <div className="checkbox-group">
                 <div>
                   <input
@@ -473,17 +450,6 @@ const InstitutionProfile = () => {
                     required
                   />
                   <label>I confirm this institution is legally registered and compliant with relevant counseling regulations.</label>
-                </div>
-
-                <div>
-                  <input
-                    type="checkbox"
-                    name="upholdEthics"
-                    checked={formData.upholdEthics}
-                    onChange={handleChange}
-                    required
-                  />
-                  <label>I agree to uphold confidentiality, ethical standards, and data protection laws.</label>
                 </div>
 
                 <div>

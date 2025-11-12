@@ -65,11 +65,6 @@ const userSchema = new mongoose.Schema({
     enum: ['in-person', 'online', 'no-preference']
   }],
 
-  // Consent
-  privacyPolicyConsent: {
-    type: Boolean,
-    default: false
-  },
   emergencyCareConsent: {
     type: Boolean,
     default: false

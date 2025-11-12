@@ -7,8 +7,6 @@ const Matches = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [comment, setComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,30 +34,7 @@ const Matches = () => {
     }
   };
 
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-
-    setSubmittingComment(true);
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/matching/feedback', {
-        comment: comment.trim()
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setComment('');
-      alert('Thank you for your feedback!');
-    } catch (error) {
-      console.error('Error submitting comment:', error);
-      alert('Failed to submit feedback. Please try again.');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
+  // Age group labels to make it more readable/user-friendly
   const getAgeGroupLabel = (ageGroup) => {
     const labels = {
       'children': 'Children (0-12)',
@@ -137,20 +112,7 @@ const Matches = () => {
               <div className="request-content">
                 <div className="request-section">
                   <h4>Compatibility</h4>
-                  <div className="score-details">
-                    <div className="score-item">
-                      <span>Overall Match: {Math.round(match.scores.total)}%</span>
-                      <div className="score-bar">
-                        <div 
-                          className="score-fill" 
-                          style={{ 
-                            width: `${match.scores.total}%`,
-                            backgroundColor: match.scores.total > 70 ? '#2ecc71' : match.scores.total > 40 ? '#f1c40f' : '#e74c3c'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <p>Overall Match: {Math.round(match.scores.total)}%</p>
                 </div>
 
                 <div className="request-section">
@@ -210,27 +172,6 @@ const Matches = () => {
           ))}
         </div>
       )}
-
-      <div className="feedback-section">
-        <h3>Help Us Improve</h3>
-        <p>Share your thoughts about the matching results</p>
-        <form onSubmit={handleCommentSubmit} className="feedback-form">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Tell us what you think about the matches..."
-            rows="4"
-            className="feedback-textarea"
-          />
-          <button 
-            type="submit" 
-            className="submit-feedback-button"
-            disabled={submittingComment || !comment.trim()}
-          >
-            {submittingComment ? 'Submitting...' : 'Submit Feedback'}
-          </button>
-        </form>
-      </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'center' }}>
         <button

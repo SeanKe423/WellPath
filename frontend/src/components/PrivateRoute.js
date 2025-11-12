@@ -1,3 +1,4 @@
+// Redirects users to the correct page based on their role to prevent unauthorized access
 import { Navigate, useLocation } from 'react-router-dom';
 
 const PrivateRoute = ({ children, requiredRole }) => {
@@ -23,9 +24,9 @@ const PrivateRoute = ({ children, requiredRole }) => {
     if (userRole === 'admin' && currentPath !== '/admin-dashboard') {
       console.log('Redirecting admin to admin dashboard');
       return <Navigate to="/admin-dashboard" replace />;
-    } else if (userRole === 'institution' && currentPath !== '/institution-profile') {
-      console.log('Redirecting institution to institution profile');
-      return <Navigate to="/institution-profile" replace />;
+    } else if (userRole === 'institution' && currentPath !== '/dashboard') {
+      console.log('Redirecting institution to dashboard');
+      return <Navigate to="/dashboard" replace />;
     } else if (userRole === 'user' && currentPath !== '/matches') {
       console.log('Redirecting user to matches');
       return <Navigate to="/matches" replace />;

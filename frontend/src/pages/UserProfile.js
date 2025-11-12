@@ -28,7 +28,6 @@ const UserProfile = () => {
     preferredMode: [],
 
     // Step 4: Consent
-    privacyPolicyConsent: false,
     emergencyCareConsent: false,
     matchingConsent: false
   });
@@ -64,7 +63,7 @@ const UserProfile = () => {
     const { name, value, type, checked } = e.target;
     
     if (type === 'checkbox') {
-      if (name === 'privacyPolicyConsent' || name === 'emergencyCareConsent' || name === 'matchingConsent') {
+      if (name === 'emergencyCareConsent' || name === 'matchingConsent') {
         setFormData(prev => ({
           ...prev,
           [name]: checked
@@ -118,7 +117,7 @@ const UserProfile = () => {
 
     // Final submission
     if (step === 4) {
-      if (!formData.privacyPolicyConsent || !formData.emergencyCareConsent || !formData.matchingConsent) {
+      if (!formData.emergencyCareConsent || !formData.matchingConsent) {
         alert('Please agree to all consent statements');
         return;
       }
@@ -395,17 +394,6 @@ const UserProfile = () => {
             <h3>Step 4: Consent</h3>
             <div className="form-questions">
               <div className="checkbox-group">
-                <div>
-                  <input
-                    type="checkbox"
-                    name="privacyPolicyConsent"
-                    checked={formData.privacyPolicyConsent}
-                    onChange={handleChange}
-                    required
-                  />
-                  <label>I agree to the platform's privacy policy and terms of use</label>
-                </div>
-
                 <div>
                   <input
                     type="checkbox"

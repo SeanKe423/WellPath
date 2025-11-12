@@ -96,6 +96,13 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+    navigate('/login');
+  };
+
   if (loading) {
     return <div className="admin-dashboard-loading">Loading...</div>;
   }
@@ -116,7 +123,16 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <h1>Admin Dashboard</h1>
+      <div style={{ display: 'inline-block', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1>Admin Dashboard</h1>
+        <button
+          className="logout-button"
+          onClick={handleLogout}
+          style={{ padding: '8px 16px', fontSize: '0.9rem', width: '110px', position: 'absolute', right: '0.5rem', top: '0.8rem' }}
+        >
+          Log Out
+        </button>
+      </div>
       <h2>Pending Institution Approvals</h2>
       <div className="institutions-list">
         {institutions.length === 0 ? (

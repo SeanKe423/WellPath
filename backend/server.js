@@ -2,7 +2,6 @@ const express = require("express"); // Express framework for creating the server
 const mongoose = require("mongoose"); // ODM(Object Data Modeling) tool for MongoDB.
 const dotenv = require("dotenv"); // Loads environment variables from .env.
 const cors = require("cors"); // Cross-Origin Resource Sharing to allow requests from different origins.
-const fileUpload = require("express-fileupload");
 const path = require("path");
 const fs = require("fs"); // File system module for file operations.
 
@@ -18,15 +17,6 @@ const app = express(); // Create express application.
 // Middleware
 app.use(express.json()); // Parse JSON bodies.
 app.use(cors()); // Enable cross-origin for all routes.
-app.use(fileUpload()); // Handle file uploads.
-
-// Create uploads directory if it doesn't exist. Useful for new deployments on new machines that don't already have the folder.
-if (!fs.existsSync("./uploads")) {
-  fs.mkdirSync("./uploads");
-}
-
-// Expose the uploads directory to the client so they can be displayed/downloaded by the frontend.
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

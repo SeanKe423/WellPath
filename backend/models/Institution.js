@@ -96,15 +96,7 @@ const counselorSchema = new mongoose.Schema({
   },
 
   // Step 5: Ethics, Verification & Consent
-  documents: {
-    type: String // URL to uploaded document
-  },
   isLegallyRegistered: {
-    type: Boolean,
-    default: false,
-    required: true
-  },
-  upholdEthics: {
     type: Boolean,
     default: false,
     required: true

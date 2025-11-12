@@ -33,12 +33,11 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-// Add this route for institution profile creation
+// Route for creating an institution profile
 router.post("/create-institution-profile", authMiddleware, async (req, res) => {
   try {
     console.log('Request received:', {
       body: req.body,
-      files: req.files,
       user: req.user
     });
 
@@ -49,22 +48,12 @@ router.post("/create-institution-profile", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Institution role required.' });
     }
 
-    // Handle file upload if documents were included
-    let documentUrl = null;
-    if (req.files && req.files.documents) {
-      const file = req.files.documents;
-      const fileName = `${Date.now()}_${file.name}`;
-      await file.mv(`./uploads/${fileName}`);
-      documentUrl = `/uploads/${fileName}`;
-    }
-
     // Parse arrays and objects from form data
     const updateData = {
       ...req.body,
-      documents: documentUrl,
       profileCompleted: true
     };
-    // Remove email if present in req.body
+    // Remove email if present in req.body to prevent tampering
     delete updateData.email;
 
     // Parse JSON strings back to objects/arrays
@@ -95,7 +84,6 @@ router.post("/create-institution-profile", authMiddleware, async (req, res) => {
 
     // Convert string booleans to actual booleans
     updateData.isLegallyRegistered = updateData.isLegallyRegistered === 'true';
-    updateData.upholdEthics = updateData.upholdEthics === 'true';
     updateData.consentToDisplay = updateData.consentToDisplay === 'true';
 
     // Convert numberOfCounselors to number
@@ -184,7 +172,6 @@ router.post("/create-user-profile", authMiddleware, async (req, res) => {
       otherCounselingService: req.body.otherCounselingService,
       severityLevel: req.body.severityLevel,
       preferredMode: safeParseArray(req.body.preferredMode),
-      privacyPolicyConsent: req.body.privacyPolicyConsent,
       emergencyCareConsent: req.body.emergencyCareConsent,
       matchingConsent: req.body.matchingConsent,
       profileCompleted: true
@@ -289,14 +276,6 @@ router.put("/edit-institution-profile", authMiddleware, async (req, res) => {
     if (typeof req.body.location === 'string') {
       req.body.location = JSON.parse(req.body.location);
     }
-    
-    let documentUrl = undefined;
-    if (req.files && req.files.documents) {
-      const file = req.files.documents;
-      const fileName = `${Date.now()}_${file.name}`;
-      await file.mv(`./uploads/${fileName}`);
-      documentUrl = `/uploads/${fileName}`;
-    }
 
     const updateData = {
       institutionName: req.body.institutionName,
@@ -319,16 +298,9 @@ router.put("/edit-institution-profile", authMiddleware, async (req, res) => {
       waitTime: req.body.waitTime,
       numberOfInstitutions: req.body.numberOfInstitutions,
       isLegallyRegistered: req.body.isLegallyRegistered === 'true',
-      upholdEthics: req.body.upholdEthics === 'true',
       consentToDisplay: req.body.consentToDisplay === 'true'
     };
 
-    // Only add documentUrl if a new file was uploaded
-    if (documentUrl) {
-      updateData.documents = documentUrl;
-    }
-
-    // When updating, do not overwrite email
     const institution = await Institution.findByIdAndUpdate(
       institutionId,
       updateData,
@@ -349,12 +321,12 @@ router.put("/edit-institution-profile", authMiddleware, async (req, res) => {
   }
 });
 
-// Add this route to verify token validity
+// Route to verify token validity
 router.get("/verify-token", authMiddleware, (req, res) => {
   res.json({ valid: true });
 });
 
-// Add this route temporarily for testing
+// Route to create a test institution (temporary)
 router.post('/create-test-institution', async (req, res) => {
   try {
     const testInstitution = new Institution({
