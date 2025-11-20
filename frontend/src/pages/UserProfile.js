@@ -7,7 +7,7 @@ import '../App.css';
 import { COUNSELING_SERVICES } from '../constants/counselingServices';
 
 const UserProfile = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); //Tracks the current step of the form
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     ageGroup: '',
@@ -65,19 +65,19 @@ const UserProfile = () => {
     if (type === 'checkbox') {
       if (name === 'emergencyCareConsent' || name === 'matchingConsent') {
         setFormData(prev => ({
-          ...prev,
+          ...prev, // Previous state of the form data is loaded and updated with the new value
           [name]: checked
         }));
       } else {
-        setFormData(prev => ({
+        setFormData(prev => ({ //For array values, not bool
           ...prev,
           [name]: checked 
-            ? [...prev[name], value]
-            : prev[name].filter(item => item !== value)
+            ? [...prev[name], value] // A new array is created from the previous array and new values are added
+            : prev[name].filter(item => item !== value) // A new array is created from the previous and the unchecked value is removed
         }));
       }
     } else {
-      setFormData(prev => ({
+      setFormData(prev => ({ //For string values, not checkboxes
         ...prev,
         [name]: value
       }));
@@ -432,7 +432,7 @@ const UserProfile = () => {
         <div className="auth-hero profile-hero">
           <div className="auth-hero-content">
             <h1>Complete Your Profile</h1>
-            <p>Help us understand you better to find the support that works for you</p> {/* Alternative: Let's find the support that works for you*/}
+            <p>Help us understand you better to find the support that works for you</p> {/* Let's find the support that works for you*/}
           </div>
         </div>
 

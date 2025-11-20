@@ -9,11 +9,11 @@ import L from 'leaflet';
 import { COUNSELING_SERVICES } from '../constants/counselingServices';
 
 // Fix for default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+delete L.Icon.Default.prototype._getIconUrl; // Removes the default method that resolves icon paths, which can fail in bundled apps.
+L.Icon.Default.mergeOptions({ //Overrides the default icon configuration with explicit CDN URLs
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png', //Standard marker icon
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png', // High-resolution marker icon
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png', 
 });
 
 const InstitutionProfile = () => {
@@ -76,7 +76,7 @@ const InstitutionProfile = () => {
       }
     };
     fetchProfile();
-    // eslint-disable-next-line
+    // 
   }, []);
 
   const handleChange = (e) => {

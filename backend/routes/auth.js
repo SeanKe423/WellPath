@@ -157,7 +157,7 @@ router.post("/create-user-profile", authMiddleware, async (req, res) => {
       }
     };
 
-    // Update user profile
+    // Data transformation for the JSON values to objects/arrays
     const updateData = {
       ageGroup: req.body.ageGroup,
       gender: req.body.gender,
@@ -179,12 +179,13 @@ router.post("/create-user-profile", authMiddleware, async (req, res) => {
 
     console.log('Update data:', JSON.stringify(updateData, null, 2));
 
+    // Update or Create user profile in the database
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
       { 
         new: true,
-        runValidators: true 
+        runValidators: true //runs schema validators on the updated data
       }
     );
 
