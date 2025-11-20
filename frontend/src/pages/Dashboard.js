@@ -20,7 +20,7 @@ const Dashboard = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log("Using token:", token); // Debug log
+        console.log("Using token:", token); 
 
         if (!token) {
           setError('No authentication token found');
@@ -34,7 +34,7 @@ const Dashboard = () => {
           }
         });
 
-        console.log("Profile response:", response.data); // Debug log
+        console.log("Profile response:", response.data); 
         setProfile(response.data);
       } catch (error) {
         console.error("Error fetching profile:", error);

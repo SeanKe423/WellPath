@@ -112,7 +112,7 @@ const Matches = () => {
               <div className="request-content">
                 <div className="request-section">
                   <h4>Compatibility</h4>
-                  <p>Overall Match: {Math.round(match.scores.total)}%</p>
+                  <p>Overall Match: {Math.round(match.scores.total)}%</p> {/* Converts to percentage */}
                 </div>
 
                 <div className="request-section">

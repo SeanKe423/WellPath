@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const Institution = require('../models/Institution');
 
-//Function to calculate the distance between the user and institution coordinates using the Haversine formula
+//Function to calculate the distance between the user and institution's coordinates using the Haversine formula
 const calculateDistance = (coords1, coords2) => {
   const R = 6371; // Earth's radius in km
   const dLat = toRad(coords2[0] - coords1[0]); //Difference in latitude
@@ -104,41 +104,25 @@ const calculateAgeGroupMatchScore = (userAgeGroup, institutionTargetAgeGroups) =
   return institutionTargetAgeGroups.includes(userAgeGroup) ? maxScore : 0;
 };
 
-const calculateAdditionalFactorsScore = (institution) => {
-  const maxScore = 10;
-  let score = 0;
+const calculateWaitTimeScore = (institutionWaitTime, userSeverityLevel) => {
+  const waitValue = {
+    'sameWeek': 1,
+    '1-2weeks': 2,
+    '3+weeks': 3
+  }[institutionWaitTime] || 3;
 
-  // Handle yearsOfOperation as string or number
-  let years = 0;
-  if (typeof institution.yearsOfOperation === 'string') {
-    if (institution.yearsOfOperation === 'less1') years = 0.5;
-    else if (institution.yearsOfOperation === '1-5') years = 3;
-    else if (institution.yearsOfOperation === '6-10') years = 8;
-    else if (institution.yearsOfOperation === '10+') years = 12;
-    else years = 0;
-  } else if (typeof institution.yearsOfOperation === 'number') {
-    years = institution.yearsOfOperation;
-  }
-  const yearsScore = Math.min(years / 10, 3);
-  score += yearsScore;
+  // Smooth base score: 10 → 7 → 4
+  let score = 10 - (waitValue - 1) * 3;
 
-  // Number of counselors (up to 3 points)
-  let numCounselors = 0;
-  if (typeof institution.numberOfCounselors === 'string') {
-    numCounselors = parseInt(institution.numberOfCounselors) || 0;
-  } else if (typeof institution.numberOfCounselors === 'number') {
-    numCounselors = institution.numberOfCounselors;
-  }
-  const counselorsScore = Math.min(numCounselors / 10, 3);
-  score += counselorsScore;
+  const severityMultiplier = {
+    mild: 1,
+    moderate: 0.8,
+    severe: 0.4
+  };
 
-  // Legal compliance (4 points)
-  if (institution.isLegallyRegistered) {
-    score += 4;
-  }
+  score *= severityMultiplier[userSeverityLevel] || 1;
 
-  // Always return a valid number
-  return Math.min(isNaN(score) ? 0 : score, maxScore);
+  return score;
 };
 
 const getMatchQuality = (score) => {
@@ -188,7 +172,10 @@ const findMatches = (user, institutions) => {
         targetAgeGroups
       );
 
-      const additionalScore = calculateAdditionalFactorsScore(institution);
+      const waitTimeScore = calculateWaitTimeScore(
+        institution.waitTime,
+        user.severityLevel || 'moderate'
+      );
 
       // Calculate total score
       const totalScore = 
@@ -196,7 +183,7 @@ const findMatches = (user, institutions) => {
         languageScore +
         locationScore +
         ageGroupScore +
-        additionalScore;
+        waitTimeScore;
 
       return {
         institution: {
@@ -211,7 +198,7 @@ const findMatches = (user, institutions) => {
           language: languageScore,
           location: locationScore,
           ageGroup: ageGroupScore,
-          additional: additionalScore,
+          waitTime: waitTimeScore,
           total: totalScore
         }
       };

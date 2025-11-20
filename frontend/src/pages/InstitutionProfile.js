@@ -106,71 +106,142 @@ const InstitutionProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Please login first');
-        navigate('/login');
+    
+    // Validate current step before incrementing
+    if (step === 1) {
+      if (!formData.institutionName || !formData.registrationNumber || !formData.yearsOfOperation || !formData.institutionType) {
+        alert('Please complete all required fields in Institution Details');
         return;
       }
-      const formDataObj = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'location') {
-          formDataObj.append('location', JSON.stringify(formData.location));
-        } else if (Array.isArray(formData[key])) {
-          formDataObj.append(key, JSON.stringify(formData[key]));
-        } else if (typeof formData[key] === 'boolean') {
-          formDataObj.append(key, formData[key].toString());
-        } else {
-          formDataObj.append(key, formData[key]);
-        }
-      });
-      let response;
-      if (isEditMode) {
-        response = await axios.put(
-          'http://localhost:5000/api/auth/edit-institution-profile',
-          formDataObj,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-      } else {
-        response = await axios.post(
-          'http://localhost:5000/api/auth/create-institution-profile',
-          formDataObj,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
+      // If "other" is selected, require otherInstitutionType
+      if (formData.institutionType === 'other' && !formData.otherInstitutionType) {
+        alert('Please specify the institution type');
+        return;
       }
-      if (response.data) {
-        alert(isEditMode ? 'Profile updated successfully!' : 'Profile created successfully!');
-        navigate('/dashboard');
+      setStep(2);
+      return;
+    }
+
+    if (step === 2) {
+      if (!formData.location.coordinates || formData.location.coordinates[0] === 0 || !formData.location.address) {
+        alert('Please select a location on the map and enter your address');
+        return;
       }
-    } catch (error) {
-      console.error('Profile save error:', error.response || error);
-      if (error.response) {
-        const { data } = error.response;
-        if (data.message) {
-          alert(`Error: ${data.message}`);
-        } else {
-          alert('Profile save failed. Please try again.');
+      if (!formData.phoneNumber) {
+        alert('Please enter your phone number');
+        return;
+      }
+      setStep(3);
+      return;
+    }
+
+    if (step === 3) {
+      if (!formData.counselingServices.length) {
+        alert('Please select at least one counseling service');
+        return;
+      }
+      if (!formData.targetAgeGroups.length) {
+        alert('Please select at least one target age group');
+        return;
+      }
+      if (!formData.languages.length) {
+        alert('Please select at least one language');
+        return;
+      }
+      if (!formData.virtualCounseling) {
+        alert('Please indicate whether you offer virtual counseling sessions');
+        return;
+      }
+      setStep(4);
+      return;
+    }
+
+    if (step === 4) {
+      if (!formData.numberOfCounselors || parseInt(formData.numberOfCounselors) < 1) {
+        alert('Please enter the number of licensed counselors (minimum 1)');
+        return;
+      }
+      if (!formData.waitTime) {
+        alert('Please select the average wait time for appointments');
+        return;
+      }
+      setStep(5);
+      return;
+    }
+
+    // Final submission (step 5)
+    if (step === 5) {
+      if (!formData.isLegallyRegistered || !formData.consentToDisplay) {
+        alert('Please agree to all consent statements');
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('Please login first');
+          navigate('/login');
+          return;
         }
-      } else if (error.request) {
-        alert('Network error. Please check your connection and try again.');
-      } else {
-        alert('An unexpected error occurred. Please try again.');
+
+        // Log the data being sent
+        console.log('Submitting institution profile data:', formData);
+
+        // Validate location data
+        if (!formData.location.coordinates || !formData.location.address) {
+          alert('Please provide your location');
+          return;
+        }
+
+        let response;
+        if (isEditMode) {
+          response = await axios.put(
+            'http://localhost:5000/api/auth/edit-institution-profile',
+            formData,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        } else {
+          response = await axios.post(
+            'http://localhost:5000/api/auth/create-institution-profile',
+            formData,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        }
+        if (response.data) {
+          alert(isEditMode ? 'Profile updated successfully!' : 'Profile created successfully!');
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Profile save error:', error.response || error);
+        if (error.response) {
+          const { data } = error.response;
+          if (data.message) {
+            alert(`Error: ${data.message}`);
+          } else {
+            alert('Profile save failed. Please try again.');
+          }
+        } else if (error.request) {
+          alert('Network error. Please check your connection and try again.');
+        } else {
+          alert('An unexpected error occurred. Please try again.');
+        }
       }
     }
   };
 
-  const nextStep = () => setStep(prev => prev + 1);
+  const nextStep = () => {
+    handleSubmit({ preventDefault: () => {} });
+  };
   const prevStep = () => setStep(prev => prev - 1);
 
   const LocationMarker = () => {

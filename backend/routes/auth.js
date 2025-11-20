@@ -48,7 +48,22 @@ router.post("/create-institution-profile", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Institution role required.' });
     }
 
-    // Parse arrays and objects from form data
+    // Helper function to safely parse arrays/objects (handles both JSON strings and already parsed data)
+    const safeParse = (data) => {
+      if (Array.isArray(data) || (typeof data === 'object' && data !== null && !Array.isArray(data))) {
+        return data; // Already parsed
+      }
+      if (typeof data === 'string') {
+        try {
+          return JSON.parse(data);
+        } catch (e) {
+          return data;
+        }
+      }
+      return data;
+    };
+
+    // Parse arrays and objects from request (handles both JSON and string formats)
     const updateData = {
       ...req.body,
       profileCompleted: true
@@ -56,38 +71,40 @@ router.post("/create-institution-profile", authMiddleware, async (req, res) => {
     // Remove email if present in req.body to prevent tampering
     delete updateData.email;
 
-    // Parse JSON strings back to objects/arrays
-    try {
-      if (typeof updateData.location === 'string') {
-        updateData.location = JSON.parse(updateData.location);
-      }
-      if (typeof updateData.counselingServices === 'string') {
-        updateData.counselingServices = JSON.parse(updateData.counselingServices);
-      }
-      if (typeof updateData.targetAgeGroups === 'string') {
-        const parsedAgeGroups = JSON.parse(updateData.targetAgeGroups);
-        // Validate age groups against enum values
-        const validAgeGroups = ['children', 'adolescents', 'youngAdults', 'adults', 'seniors'];
-        updateData.targetAgeGroups = parsedAgeGroups.filter(group => validAgeGroups.includes(group));
-        console.log('Parsed age groups:', updateData.targetAgeGroups);
-      }
-      if (typeof updateData.languages === 'string') {
-        updateData.languages = JSON.parse(updateData.languages);
-      }
-    } catch (parseError) {
-      console.error('Error parsing form data:', parseError);
-      return res.status(400).json({ 
-        message: "Error parsing form data",
-        error: parseError.message 
-      });
+    // Parse location if it's a string, otherwise use as-is
+    if (updateData.location) {
+      updateData.location = safeParse(updateData.location);
     }
 
-    // Convert string booleans to actual booleans
-    updateData.isLegallyRegistered = updateData.isLegallyRegistered === 'true';
-    updateData.consentToDisplay = updateData.consentToDisplay === 'true';
+    // Parse arrays if they're strings, otherwise use as-is
+    if (updateData.counselingServices) {
+      updateData.counselingServices = safeParse(updateData.counselingServices);
+    }
+    
+    if (updateData.targetAgeGroups) {
+      const parsedAgeGroups = safeParse(updateData.targetAgeGroups);
+      // Validate age groups against enum values
+      const validAgeGroups = ['children', 'adolescents', 'youngAdults', 'adults', 'seniors'];
+      updateData.targetAgeGroups = Array.isArray(parsedAgeGroups) 
+        ? parsedAgeGroups.filter(group => validAgeGroups.includes(group))
+        : [];
+      console.log('Parsed age groups:', updateData.targetAgeGroups);
+    }
+    
+    if (updateData.languages) {
+      updateData.languages = safeParse(updateData.languages);
+    }
 
-    // Convert numberOfCounselors to number
-    if (updateData.numberOfCounselors) {
+    // Handle booleans (could be boolean or string 'true'/'false')
+    if (typeof updateData.isLegallyRegistered === 'string') {
+      updateData.isLegallyRegistered = updateData.isLegallyRegistered === 'true';
+    }
+    if (typeof updateData.consentToDisplay === 'string') {
+      updateData.consentToDisplay = updateData.consentToDisplay === 'true';
+    }
+
+    // Convert numberOfCounselors to number if it's a string
+    if (updateData.numberOfCounselors && typeof updateData.numberOfCounselors === 'string') {
       updateData.numberOfCounselors = parseInt(updateData.numberOfCounselors);
     }
 
@@ -273,33 +290,53 @@ router.put("/edit-institution-profile", authMiddleware, async (req, res) => {
   try {
     const institutionId = req.user.id;
     
-    // Parse location if sent as a string
-    if (typeof req.body.location === 'string') {
-      req.body.location = JSON.parse(req.body.location);
-    }
+    // Helper function to safely parse arrays/objects
+    const safeParse = (data, defaultValue = null) => {
+      if (Array.isArray(data) || (typeof data === 'object' && data !== null && !Array.isArray(data))) {
+        return data; // Already parsed
+      }
+      if (typeof data === 'string') {
+        try {
+          return JSON.parse(data);
+        } catch (e) {
+          return defaultValue || data;
+        }
+      }
+      return data || defaultValue;
+    };
+
+    // Parse location if sent as a string, otherwise use as-is
+    const location = safeParse(req.body.location, { coordinates: [0, 0], address: '' });
 
     const updateData = {
       institutionName: req.body.institutionName,
       registrationNumber: req.body.registrationNumber,
       yearsOfOperation: req.body.yearsOfOperation,
       institutionType: req.body.institutionType,
+      otherInstitutionType: req.body.otherInstitutionType,
       location: {
-        coordinates: req.body.location.coordinates || [0, 0],
-        address: req.body.location.address
+        coordinates: location.coordinates || [0, 0],
+        address: location.address || ''
       },
       phoneNumber: req.body.phoneNumber,
       website: req.body.website,
-      counselingServices: Array.isArray(req.body.counselingServices) ? req.body.counselingServices : JSON.parse(req.body.counselingServices || '[]'),
+      counselingServices: safeParse(req.body.counselingServices, []),
       otherCounselingService: req.body.otherCounselingService,
-      targetAgeGroups: Array.isArray(req.body.targetAgeGroups) ? req.body.targetAgeGroups : JSON.parse(req.body.targetAgeGroups || '[]'),
-      languages: Array.isArray(req.body.languages) ? req.body.languages : JSON.parse(req.body.languages || '[]'),
+      targetAgeGroups: safeParse(req.body.targetAgeGroups, []),
+      languages: safeParse(req.body.languages, []),
       otherLanguage: req.body.otherLanguage,
       virtualCounseling: req.body.virtualCounseling,
-      numberOfCounselors: req.body.numberOfCounselors,
+      numberOfCounselors: typeof req.body.numberOfCounselors === 'string' 
+        ? parseInt(req.body.numberOfCounselors) 
+        : req.body.numberOfCounselors,
       waitTime: req.body.waitTime,
       numberOfInstitutions: req.body.numberOfInstitutions,
-      isLegallyRegistered: req.body.isLegallyRegistered === 'true',
-      consentToDisplay: req.body.consentToDisplay === 'true'
+      isLegallyRegistered: typeof req.body.isLegallyRegistered === 'string' 
+        ? req.body.isLegallyRegistered === 'true' 
+        : req.body.isLegallyRegistered,
+      consentToDisplay: typeof req.body.consentToDisplay === 'string' 
+        ? req.body.consentToDisplay === 'true' 
+        : req.body.consentToDisplay
     };
 
     const institution = await Institution.findByIdAndUpdate(
