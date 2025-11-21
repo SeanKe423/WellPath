@@ -93,6 +93,7 @@ const calculateLocationMatchScore = (userLocation, institutionLocation, preferre
     // Score based on distance (closer = higher score)
     const MAX_DISTANCE = 100; // 100km
     score = maxScore * (1 - (distance / MAX_DISTANCE));
+    score = Math.max(0, score); // Ensure score is never negative
   }
 
   return Math.min(score, maxScore);

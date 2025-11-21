@@ -140,10 +140,63 @@ const AdminDashboard = () => {
         ) : (
           institutions.map(institution => (
             <div key={institution._id} className="institution-card">
-              <h3>{institution.name}</h3>
-              <p><strong>Email:</strong> {institution.email}</p>
-              <p><strong>Type:</strong> {institution.type}</p>
-              <p><strong>Status:</strong> {institution.approvalStatus}</p>
+              <div className="card-header">
+                <h3>{institution.institutionName || 'N/A'}</h3>
+                <span className={`status-badge ${institution.approvalStatus || 'pending'}`}>
+                  {institution.approvalStatus || 'pending'}
+                </span>
+              </div>
+              
+              <div className="card-body">
+                <div className="info-section">
+                  <h4>Institution Details</h4>
+                  <p><strong>Email:</strong> {institution.email || 'Not provided'}</p>
+                  <p><strong>Registration Number:</strong> {institution.registrationNumber || 'Not provided'}</p>
+                  <p><strong>Type:</strong> {institution.institutionType || 'Not provided'}</p>
+                  <p><strong>Years of Operation:</strong> {
+                    institution.yearsOfOperation === 'less1' ? 'Less than 1 year' :
+                    institution.yearsOfOperation === '1-5' ? '1-5 years' :
+                    institution.yearsOfOperation === '6-10' ? '6-10 years' :
+                    institution.yearsOfOperation === '10+' ? '10+ years' :
+                    institution.yearsOfOperation || 'Not provided'
+                  }</p>
+                </div>
+
+                <div className="info-section">
+                  <h4>Contact Information</h4>
+                  <p><strong>Address:</strong> {institution.location?.address || 'Not provided'}</p>
+                  <p><strong>Phone:</strong> {institution.phoneNumber || 'Not provided'}</p>
+                </div>
+
+                <div className="info-section">
+                  <h4>Services Offered</h4>
+                  {institution.counselingServices && institution.counselingServices.length > 0 ? (
+                    <div className="services-list">
+                      {institution.counselingServices.map((service, index) => (
+                        <span key={index} className="service-tag">{service}</span>
+                      ))}
+                      {institution.otherCounselingService && (
+                        <span className="service-tag">{institution.otherCounselingService}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <p>No services specified</p>
+                  )}
+                </div>
+
+                <div className="info-section">
+                  <p><strong>Submission Date:</strong> {
+                    institution.createdAt 
+                      ? new Date(institution.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : 'Not available'
+                  }</p>
+                </div>
+              </div>
+
               {institution.approvalStatus === 'pending' && (
                 <div className="approval-buttons">
                   <button 

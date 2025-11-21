@@ -35,9 +35,40 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.institution-card h3 {
-  color: #2c3e50;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.card-body {
+  margin-bottom: 1rem;
+}
+
+.card-body .info-section {
+  margin-bottom: 1.5rem;
+}
+
+.card-body .info-section:last-child {
+  margin-bottom: 0;
+}
+
+.card-body .info-section h4 {
+  color: #444;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
 }
 
 .institution-card p {
@@ -47,6 +78,49 @@
 
 .institution-card strong {
   color: #444;
+}
+
+.services-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.service-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #e3f2fd;
+  color: #000000;
+  border-radius: 15px;
+  font-size: 0.875rem;
+  border: 1px solid #90caf9;
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.status-badge.approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+
+.status-badge.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
 }
 
 .approval-buttons {
