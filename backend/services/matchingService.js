@@ -140,7 +140,7 @@ const findMatches = (user, institutions) => {
 
     // 2. Calculate scores for each institution
     const scoredInstitutions = eligibleInstitutions.map(institution => {
-      // Ensure targetAgeGroups is an array
+      // Ensure targetAgeGroups is an array so that the 'includes' check works safely
       const targetAgeGroups = Array.isArray(institution.targetAgeGroups) ? 
         institution.targetAgeGroups : 
         [];

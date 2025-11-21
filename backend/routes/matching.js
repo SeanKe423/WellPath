@@ -15,6 +15,11 @@ router.get('/matches', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if profile is completed
+    if (!user.profileCompleted) {
+      return res.status(400).json({ message: 'Please complete your profile first' });
+    }
+
     // Get all approved institutions
     const institutions = await Institution.find({ approvalStatus: 'approved' });
     
